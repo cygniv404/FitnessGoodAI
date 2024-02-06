@@ -1,0 +1,55 @@
+version: "3.8"
+services:
+  database:
+    image: mongo
+    container_name: database
+    volumes:
+      - ./database:/data/db
+    env_file: .env
+    environment:
+          MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+          MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+          MONGO_INITDB_DATABASE: ${MONGO_INITDB_DATABASE}
+    ports:
+      - 27017:27017
+    restart: unless-stopped
+  app:
+    container_name: app
+    build:
+      context: app/
+      target: base
+    working_dir: /app
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./app/:/app/
+    ports:
+      - 5000:5000
+    command: python app.py
+  server:
+    container_name: server
+    build:
+      context: server/
+    working_dir: /app
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./server/:/app/
+    ports:
+      - 6000:6000
+    command: node index.js
+  front:
+    container_name: front
+    build:
+      context: front/
+    working_dir: /app
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./front/:/app/
+    ports:
+      - 8080:8080
+    command: npm run dev
